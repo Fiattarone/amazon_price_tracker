@@ -2,9 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 from pprint import pprint
 import lxml
-
+import smtplib
 
 # - 1 Shirt Press
+LOWEST_PRICE = 449.00
 
 AMAZON_URLS = [
     "https://www.amazon.com/Dulytek-DHP7-Hydraulic-Pressing-Touch-Screen/dp/B07PBD1RH2/ref=sr_1_9?keywords=wax%2Bpress"
@@ -21,4 +22,13 @@ for url in AMAZON_URLS:
     response = requests.get(url=url, headers=headers)
     # response.raise_for_status()
     soup = BeautifulSoup(response.text, "lxml")
-    pprint(float(soup.find(name="span", class_="a-offscreen").getText().split("$")[1]))
+    current_price = float(soup.find(name="span", class_="a-offscreen").getText().split("$")[1])
+    if LOWEST_PRICE > current_price:
+        my_email: str
+        my_password: str
+        email: str
+        with smtplib.SMTP("smtp.gmail.com", port=587) as econnection:
+            econnection.starttls()
+            econnection.login(user=my_email, password=my_password)
+            econnection.sendmail(from_addr=my_email, to_addrs=email,
+                                         msg=f"subject: AMAZON DEAL ALERT!\n\nURL: {url} CURRENT PRICE: {current_price} ")
